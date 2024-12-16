@@ -6,7 +6,9 @@ const app = express()
 app.use(express.json())
 app.use(cors())
 
-mongoose.connect("mongodb://http://127.0.0.1:5173/users")
+mongoose.connect("mongodb://localhost:27017/users", {})
+    .then(() => console.log("Connected to MongoDB"))
+    .catch(err => console.error("MongoDB connection error:", err));
 
 app.post('/login', (req, res) => {
     const {email, password} = req.body
