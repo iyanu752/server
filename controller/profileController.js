@@ -28,13 +28,13 @@ exports.uploadImg = async (req, res) => {
 
 exports.getImage = async (req, res) => {
   try {
-    const user = await profileModel.findOne({ _id: req.params.id });
+    const user = await usereModel.findOne({ _id: req.params.id });
 
     if (!user || !user.imageUrl) {
       return res.status(404).json({ message: "Profile image not found" });
     }
 
-    res.status(200).json({ imageUrl: user.imageUrl });
+    res.status(200).json({ imageUrl: user.profileImg });
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }

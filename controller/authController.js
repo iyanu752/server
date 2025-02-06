@@ -35,9 +35,13 @@ exports.signup = (req, res) => {
     .create(req.body)
     .then((user) =>
       res.json({
-        message: "User created successfully",
+        message: "Signup Successful",
         userId: user.userId, // Return the generated userId
       })
     )
     .catch((err) => res.status(400).json({ error: err.message }));
+};
+
+exports.logout = (req, res) => {
+  res.json({ message: "Logout successful" });
 };
