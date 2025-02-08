@@ -9,6 +9,6 @@ const { authMiddleware } = require("../middleware/authMiddleware");
 const router = new express.Router();
 
 router.post("/image", authMiddleware, upload.single("userImage"), uploadImg);
-router.get("/image/:id", getImage);
+router.get("/image", authMiddleware, getImage);
 router.delete("/image/:id", deleteImg);
 module.exports = router;
