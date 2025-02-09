@@ -38,7 +38,7 @@ exports.getImage = async (req, res) => {
     if(!user || !user.profileImg) {
       return res.status(404).send({message: "profile image not found"})
     }
-    res.status (200).send ({profileImg: user.profileImg});
+    res.status (200).send ({user});
   } catch (error) {
     console.error("Error fetchig profile image:", error);
     res.status(500).send({message: "Internal server Error", error: error.message})
