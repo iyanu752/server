@@ -32,9 +32,7 @@ exports.uploadImg = async (req, res) => {
 exports.getImage = async (req, res) => {
   try {
     const userId =  req.user.userId;
-    console.log('request', req.params)
     const user = await userModel.findById(userId);
-    console.log('user', user)
     if(!user || !user.profileImg) {
       return res.status(404).send({message: "profile image not found"})
     }
@@ -45,23 +43,20 @@ exports.getImage = async (req, res) => {
   }
 };
 
-exports.deleteImg = async (req, res) => {
+exports.deleteImage = async (req, res) => {
   try {
-    const user = await profileModel.findOne({ _id: req.params.id });
-    const publicId = user.publicId;
+    const userId = req.user.userId;
+    const user = await userModel.findById(userId);
+    if (!user || !user.profileImg) {
+      return res.status(404).send({ message: "Profile image not found" });
+    }
+    const publicId = user.profileImg;
     await removeFromCloudinary(publicId);
-    const deleteImg = await profileModel.updateOne(
-      { _id: req.params.id },
-      {
-        $set: {
-          imageUrl: "",
-          publicId: "",
-        },
-      }
-    );
-    res.status(200).send("profile image deleted sucessfully");
+    await userModel.updateOne({ _id: userId }, { $unset: { profileImg: 1 } });
+    res.status(200).send({ message: "Profile image deleted successfully" });
   } catch (error) {
-    res.status(400).send(error);
+    console.error("Error deleting profile image:", error);
+    res.status(500).send({ message: "Internal Server Error", error: error.message });
   }
 };
 
