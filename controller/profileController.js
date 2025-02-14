@@ -2,7 +2,6 @@ const {
   uploadToCloudinary,
   removeFromCloudinary,
 } = require("../config/cloudinary");
-const profileModel = require("../models/profile");
 const userModel = require("../models/user");
 
 exports.uploadImg = async (req, res) => {
