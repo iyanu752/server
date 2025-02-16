@@ -12,6 +12,10 @@ const dashboardCardSchema = new mongoose.Schema({
     AdjustedTypingSpeedChange: {type: String, required: false},
     performanceScore: {type: String, required: false},
     highestPerformanceScore: {type: String, required: false},
+    gamesPlayed:  {type: String, required: false},
+    bestAccuracy: {type: String, required: false},
+    bestWPM: {type: String, required: false},
+    rank: {type: String, required: false},
     createdAt: { type: Date, default: Date.now }
 })
 

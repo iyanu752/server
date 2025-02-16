@@ -157,7 +157,77 @@ const fetchCountryFlags = async () => {
       res.status(500).json({ error: "Failed to fetch leaderboard" });
     }
   };
+
+  exports.getBarStats = async (req, res) => {
+    try {
+        const userId = req.user?.userId;
+        if (!userId) {
+            return res.status(400).json({ error: "User ID is required" });
+        }
+        const stats = await dashboardCardModel.find({ userId }).sort({ createdAt: 1 });
+        if (stats.length === 0) {
+            return res.json([]); 
+        }
+        const dayMapping = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        const highestScores = {};
+        stats.forEach(({ createdAt, performanceScore }) => {
+            const day = dayMapping[new Date(createdAt).getDay()];
+            if (!highestScores[day] || performanceScore > highestScores[day]) {
+                highestScores[day] = performanceScore;
+            }
+        });
+        const result = dayMapping.map(day => ({
+            day,
+            performanceScore: highestScores[day] || 0,
+        }));
+        console.log("Highest Performance Scores:", result);
+        res.json(result);
+
+    } catch (error) {
+        console.error("Error fetching highest performance scores:", error);
+        res.status(500).json({ error: "Failed to fetch data" });
+    }
+};
  
+exports.getStatistics = async (req, res) => {
+  try {
+     const userId = req.user?.userId;
+     if (!userId) {
+        return res.status(400).json({ error: "User ID is required" });
+     }
+     const userStats = await dashboardCardModel.find({ userId });
+     if (userStats.length === 0) {
+        return res.json({
+           gamesPlayed: 0,
+           bestAccuracy: 0,
+           bestWPM: 0,
+           rank: null,
+        });
+     }
+     const gamesPlayed = userStats.length;
+     const bestAccuracy = Math.max(...userStats.map(stat => parseFloat(stat.accuracy)));
+     const bestWPM = Math.max(...userStats.map(stat => parseFloat(stat.currentTypingSpeed)));
+     const leaderboard = await dashboardCardModel.aggregate([
+        {
+           $group: {
+              _id: "$userId",
+              highestPerformanceScore: { $max: { $toDouble: "$performanceScore" } },
+           }
+        },
+        { $sort: { highestPerformanceScore: -1 } }
+     ]);
+     const userRank = leaderboard.findIndex(entry => entry._id.toString() === userId.toString()) + 1;
+     res.json({
+        gamesPlayed,
+        bestAccuracy: bestAccuracy.toFixed(2),
+        bestWPM: bestWPM.toFixed(2),
+        rank: userRank || null,
+     });
+  } catch (error) {
+     console.error("Error fetching user overall stats:", error);
+     res.status(500).json({ error: "Failed to fetch user overall stats" });
+  }
+};
 
 
 
