@@ -1,5 +1,6 @@
 const dashboardCardModel = require("../models/dashboardCard");
 const userModel = require("../models/user");
+const axios = require("axios");
 
 exports.updateStatCards = async (req, res) => {
     const userId = req.user?.userId;
@@ -107,38 +108,56 @@ exports.getAreaChartHistory = async (req, res) => {
 //get country but display the flag
 //get the performance score(but only display the highest performance score)
 
-exports.getLeaderboard = async (req, res) => {
+const fetchCountryFlags = async () => {
     try {
-        const highestScores = await dashboardCardModel.aggregate([
-            {
-                $group: {
-                    _id: "$userId",
-                    highestPerformanceScore: { $max: { $toDouble: "$performanceScore" } }
-                }
-            },
-            { $sort: { highestPerformanceScore: -1 } }
-        ]);
-        const userIds = highestScores.map(item => item._id);
-        const users = await userModel.find({ _id: { $in: userIds } }).select("userId name");
-        const profiles = await userModel.find({ userId: { $in: userIds } }).select("userId country");
-        const leaderboard = highestScores.map((item, index) => {
-            const user = users.find(u => u._id.equals(item._id));
-            const profile = profiles.find(p => p._id.equals(item._id));
-            return {
-                rank: index + 1,
-                username: user?.name || "Unknown",
-                highestPerformanceScore: item.highestPerformanceScore,
-                countryFlag: profile?.country || "",
-            };
-        });
-        console.log('get leaderboard: ', leaderboard);
-        res.json({ success: true, leaderboard });
+      const response = await axios.get("https://restcountries.com/v3.1/all");
+      const data = response.data;
+      countryFlagMap = data.reduce((acc, country) => {
+        acc[country.name.common] = country.flags.png;
+        return acc;
+      }, {});
     } catch (error) {
-        console.error("Error fetching leaderboard:", error);
-        res.status(500).json({ error: "Failed to fetch leaderboard" });
+      console.error("Error fetching country flags:", error);
     }
-};
-
+  };
+  fetchCountryFlags();
+  exports.getLeaderboard = async (req, res) => {
+    try {
+      const highestScores = await dashboardCardModel.aggregate([
+        {
+          $group: {
+            _id: "$userId",
+            highestPerformanceScore: { $max: { $toDouble: "$performanceScore" } }
+          }
+        },
+        { $sort: { highestPerformanceScore: -1 } }
+      ]);
+      const userIds = highestScores.map(item => item._id);
+      const users = await userModel.find({ _id: { $in: userIds } }).select("userId name");
+      const profiles = await userModel.find({ userId: { $in: userIds } }).select("userId country");
+      const leaderboard = highestScores.map((item, index) => {
+        const user = users.find(u => u._id.equals(item._id));
+        const profile = profiles.find(p => p._id.equals(item._id));
+        
+        const countryName = profile?.country || "Unknown";
+        const countryFlag = countryFlagMap[countryName] || ""; 
+  
+        return {
+          rank: index + 1,
+          username: user?.name || "Unknown",
+          highestPerformanceScore: item.highestPerformanceScore,
+          countryName,
+          countryFlag, 
+        };
+      });
+      console.log("get leaderboard:", leaderboard);
+      res.json({ success: true, leaderboard });
+    } catch (error) {
+      console.error("Error fetching leaderboard:", error);
+      res.status(500).json({ error: "Failed to fetch leaderboard" });
+    }
+  };
+ 
 
 
 
