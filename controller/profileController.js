@@ -42,6 +42,20 @@ exports.getImage = async (req, res) => {
   }
 };
 
+exports.getUser = async (req, res) => {
+  try {
+    const userId =  req.user.userId;
+    const user = await userModel.findById(userId);
+    if(!user) {
+      return res.status(404).send({message: "user image not found"})
+    }
+    res.status (200).send ({user});
+  } catch (error) {
+    console.error("Error fetchig user:", error);
+    res.status(500).send({message: "Internal server Error", error: error.message})
+  }
+};
+
 exports.deleteImage = async (req, res) => {
   try {
     const userId = req.user.userId;

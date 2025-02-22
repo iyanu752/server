@@ -11,12 +11,12 @@ exports.updateStatCards = async (req, res) => {
     }
 
     try {
-        console.log("UserID:", userId);
+
 
         const previousStats = await dashboardCardModel.find({ userId }).sort({ createdAt: -1 }).limit(1);
         const lastStats = previousStats.length > 0 ? previousStats[0] : null;
 
-        console.log("Previous Stats:", lastStats);
+
         const wpmChange = lastStats && lastStats.currentTypingSpeed > 0
             ? ((wpm - lastStats.currentTypingSpeed) / lastStats.currentTypingSpeed) * 100
             : 0;
@@ -39,7 +39,6 @@ exports.updateStatCards = async (req, res) => {
         // **New Performance Score Calculation**
         const performanceScore = (wpm * 0.6) + (accuracy * 0.3) + (typingConsistency * 0.1);
 
-        console.log("Calculated Performance Score:", performanceScore);
 
         const newStats = new dashboardCardModel({
             userId,
@@ -93,7 +92,7 @@ exports.getAreaChartHistory = async (req, res) => {
             day: dayMapping[new Date(stat.createdAt).getDay()],
             performanceScore: parseFloat(stat.performanceScore) || 0
         }));
-        console.log('history', history);
+    
         res.json(history);
     } catch (error) {
         console.error("Error fetching performance history: ", error);
@@ -150,7 +149,7 @@ const fetchCountryFlags = async () => {
           countryFlag, 
         };
       });
-      console.log("get leaderboard:", leaderboard);
+
       res.json({ success: true, leaderboard });
     } catch (error) {
       console.error("Error fetching leaderboard:", error);
@@ -180,7 +179,7 @@ const fetchCountryFlags = async () => {
             day,
             performanceScore: highestScores[day] || 0,
         }));
-        console.log("Highest Performance Scores:", result);
+
         res.json(result);
 
     } catch (error) {
@@ -204,7 +203,7 @@ exports.getStatistics = async (req, res) => {
            rank: null,
         });
      }
-     const gamesPlayed = userStats.length;
+     const gamesPlayed = userStats.length - 1;
      const bestAccuracy = Math.max(...userStats.map(stat => parseFloat(stat.accuracy)));
      const bestWPM = Math.max(...userStats.map(stat => parseFloat(stat.currentTypingSpeed)));
      const leaderboard = await dashboardCardModel.aggregate([
