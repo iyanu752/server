@@ -6,7 +6,7 @@ const {updateStatCards, getStatsCards, getAreaChartHistory, getLeaderboard, getB
 router.post("/dashstats", authMiddleware, updateStatCards);
 router.get("/dashstats", authMiddleware, getStatsCards);
 router.get("/performance-history", authMiddleware, getAreaChartHistory);
-router.get("/leaderboard",authMiddleware, getLeaderboard);
+router.get("/leaderboard", getLeaderboard);
 router.get("/barstats", authMiddleware, getBarStats);
 router.get("/totalstats", authMiddleware, getStatistics);
 module.exports = router;

@@ -63,15 +63,19 @@ exports.deleteImage = async (req, res) => {
     if (!user || !user.profileImg) {
       return res.status(404).send({ message: "Profile image not found" });
     }
-    const publicId = user.profileImg;
+    const profileImgUrl = user.profileImg;
+    const parts = profileImgUrl.split("/");
+    const publicIdWithExtension = parts.slice(-2).join("/");
+    const publicId = publicIdWithExtension.split(".")[0]; 
     await removeFromCloudinary(publicId);
     await userModel.updateOne({ _id: userId }, { $unset: { profileImg: 1 } });
     res.status(200).send({ message: "Profile image deleted successfully" });
   } catch (error) {
     console.error("Error deleting profile image:", error);
     res.status(500).send({ message: "Internal Server Error", error: error.message });
-  }
+  } 
 };
+
 
 
 // /:id = /123
