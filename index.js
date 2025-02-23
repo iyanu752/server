@@ -9,9 +9,11 @@ connectDB();
 const authRoutes = require('./routes/authRoutes');
 const profileRoutes = require('./routes/profileRoutes')
 const dashStatRoutes = require('./routes/dashStatRoutes')
+const emailRoute = require('./routes/emailRoute')
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes)
 app.use('/api/dashstat', dashStatRoutes)
+app.use('/api/email', emailRoute)
 module.exports = app;
 
 
